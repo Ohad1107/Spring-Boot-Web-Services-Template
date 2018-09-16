@@ -1,0 +1,2 @@
+include ':Spring-Boot-Web-Services-infra'
+project(':Spring-Boot-Web-Services-infra').projectDir = new File(settingsDir, '../Spring-Boot-Web-Services-infra')

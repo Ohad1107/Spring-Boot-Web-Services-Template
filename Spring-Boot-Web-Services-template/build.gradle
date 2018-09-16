@@ -1,0 +1,63 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.0.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'template'
+    version = '0.0.1-SNAPSHOT'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compile.exclude group:'ch.qos.logback'
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-logging"
+    }
+    compile ('org.springframework.boot:spring-boot-starter-log4j2')
+    compile ('org.springframework.boot:spring-boot-starter-actuator')
+    compile ('org.projectlombok:lombok')
+    compile project(':Spring-Boot-Web-Services-infra')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+
+eclipse {
+    classpath {
+        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+    }
+}
+
+task docker_build(type:Exec) {
+    commandLine '/bin/bash', '-c', 'docker build --rm -t '+System.getenv("docker_repo")+'.'+System.getenv("reverse_proxy")+'/micro-services/template:'+System.getenv("BUILD_NUMBER")+' .'
+}
+
+task docker_tag(type:Exec) {
+    commandLine '/bin/bash', '-c', 'docker tag /micro-services/template '+System.getenv("docker_repo")+'.'+System.getenv("reverse_proxy")+'/micro-services/template'
+}
+
+task docker_push(type:Exec) {
+    commandLine '/bin/bash', '-c', 'docker push '+System.getenv("docker_repo")+'.'+System.getenv("reverse_proxy")+'/micro-services/template'
+}
+
+task docker_remove(type:Exec) {
+    commandLine '/bin/bash', '-c', 'docker rmi '+System.getenv("docker_repo")+'.'+System.getenv("reverse_proxy")+'/micro-services/template:'+System.getenv("BUILD_NUMBER")+''
+}

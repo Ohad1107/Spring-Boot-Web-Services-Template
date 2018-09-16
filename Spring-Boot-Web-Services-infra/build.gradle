@@ -1,0 +1,96 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.1.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath( group: 'org.jfrog.buildinfo',
+                name: 'build-info-extractor-gradle',
+                version: '4.4.9')
+
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: "com.jfrog.artifactory"
+
+jar {
+    baseName = 'infra'
+    version = '0.0.1-SNAPSHOT'
+    group = 'com.template'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compile.exclude group:'ch.qos.logback'
+}
+
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile('org.springframework.boot:spring-boot-starter-aop')
+    compile ('org.springframework.boot:spring-boot-starter-log4j2')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.projectlombok:lombok')
+    compile('io.prometheus:simpleclient:0.0.19')
+    compile('io.prometheus:simpleclient_common:0.0.19')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+
+        debug.events = ["started", "skipped", "failed"]
+        info.events = ["failed", "skipped"]
+    }
+}
+
+artifactory {
+    contextUrl = "${repositoryUrl}"
+    publish {
+        repository {
+            repoKey = 'tucore-integration-local'
+            username = "${repositoryUser}"
+            password = "${repositoryPassword}"
+            maven = true
+
+        }
+        defaults {
+            publications ('mavenJava')
+        }
+    }
+}
+
+artifactoryPublish {
+    dependsOn jar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId  jar.getGroup()
+            artifactId jar.getBaseName()
+            version '0.0.1-SNAPSHOT'
+            from components.java
+        }
+    }
+}
+processResources {
+    expand(project.properties)
+}
+
+
+

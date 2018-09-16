@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60" packages="com.infra.context">
+    <Properties>
+        <Property name="path">logs</Property>
+    </Properties>
+    <Appenders>
+        <File name="App-Appender" fileName="${path}/template_microservice.log" >
+            <PatternLayout>
+                <pattern>
+                    %d; [%tid]; *%-5level*; %context; %C.%M() -> %m%n
+                </pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="App-Appender"/>
+        </Root>
+    </Loggers>
+</Configuration>
